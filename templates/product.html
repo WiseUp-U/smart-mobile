@@ -1,0 +1,137 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="product-page" style="max-width:900px; margin:auto; padding:20px;">
+
+    <h1 style="margin-bottom:15px; font-size:28px;">{{ product.name }}</h1>
+
+    {% if product.images %}
+    <!-- Carousel -->
+    <div class="carousel-container" style="position:relative; overflow:hidden; height:350px; margin-bottom:10px; border-radius:8px;">
+        <div class="carousel-track" style="display:flex; transition:transform 0.3s ease; align-items:center; height:100%;">
+            {% for img in product.images %}
+            <img src="/static/uploads/{{ img.filename }}" class="carousel-image"
+                 style="max-height:100%; width:auto; margin:auto; transition: transform 0.3s; cursor:pointer;" loading="lazy">
+            {% endfor %}
+        </div>
+
+        <button id="prev-btn" style="position:absolute; top:50%; left:5px; transform:translateY(-50%); background:rgba(0,0,0,0.5); color:white; border:none; border-radius:50%; width:35px; height:35px; cursor:pointer;">&#10094;</button>
+        <button id="next-btn" style="position:absolute; top:50%; right:5px; transform:translateY(-50%); background:rgba(0,0,0,0.5); color:white; border:none; border-radius:50%; width:35px; height:35px; cursor:pointer;">&#10095;</button>
+    </div>
+
+    <!-- Thumbnails -->
+    <div class="carousel-thumbs" style="display:flex; gap:10px; justify-content:center; margin-bottom:20px;">
+        {% for img in product.images %}
+        <img src="/static/uploads/{{ img.filename }}" class="thumb-image"
+             style="width:70px; height:70px; object-fit:contain; border:2px solid #ccc; border-radius:5px; cursor:pointer;"
+             data-index="{{ loop.index0 }}" loading="lazy">
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- Product Info -->
+    <div class="product-info" style="margin-top:20px; font-size:16px;">
+        <p><strong>Brand:</strong> {{ product.brand }}</p>
+        <p><strong>Price:</strong> <span style="color:#2E8B57; font-weight:bold;">${{ product.price }}</span></p>
+        <p><strong>RAM:</strong> {{ product.ram }}</p>
+        <p><strong>Storage:</strong> {{ product.storage }}</p>
+        <p><strong>Condition:</strong> {{ product.condition }}</p>
+        <p><strong>Status:</strong> 
+            <span style="color:{{ 'green' if product.status=='available' else 'red' }}; font-weight:bold;">
+                {{ product.status|capitalize }}
+            </span>
+        </p>
+        <p><strong>Description:</strong><br>{{ product.description }}</p>
+    </div>
+
+    <!-- Call to Action -->
+    <div class="actions" style="margin-top:25px; text-align:center;">
+        <a href="tel:09123456789" class="btn btn-primary" style="font-size:18px; padding:12px 25px;">
+            Call Seller
+        </a>
+    </div>
+</div>
+
+<!-- Lightbox HTML -->
+<div id="lightbox" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.9); justify-content:center; align-items:center; z-index:9999;">
+    <button id="lb-prev" style="position:absolute; left:10px; top:50%; transform:translateY(-50%); background:none; border:none; color:white; font-size:40px; cursor:pointer;">&#10094;</button>
+    <img id="lb-image" src="" style="max-width:90%; max-height:90%; border-radius:8px;">
+    <button id="lb-next" style="position:absolute; right:10px; top:50%; transform:translateY(-50%); background:none; border:none; color:white; font-size:40px; cursor:pointer;">&#10095;</button>
+</div>
+
+<!-- Carousel & Lightbox JS -->
+<script>
+const track = document.querySelector('.carousel-track');
+const images = document.querySelectorAll('.carousel-image');
+const prevBtn = document.getElementById('prev-btn');
+const nextBtn = document.getElementById('next-btn');
+const thumbs = document.querySelectorAll('.thumb-image');
+
+let index = 0;
+
+function showSlide(i) {
+    if(i < 0) index = images.length - 1;
+    else if(i >= images.length) index = 0;
+    else index = i;
+
+    let offset = 0;
+    for(let j=0; j<index; j++){
+        offset += images[j].clientWidth;
+    }
+    track.style.transform = `translateX(-${offset}px)`;
+
+    thumbs.forEach(t => t.style.borderColor = '#ccc');
+    if(thumbs[index]) thumbs[index].style.borderColor = '#2E8B57';
+}
+
+prevBtn.addEventListener('click', () => showSlide(index-1));
+nextBtn.addEventListener('click', () => showSlide(index+1));
+
+thumbs.forEach(t => {
+    t.addEventListener('click', () => {
+        const i = parseInt(t.getAttribute('data-index'));
+        showSlide(i);
+    });
+});
+
+// Swipe for mobile
+let startX = 0;
+track.addEventListener('touchstart', e => { startX = e.touches[0].clientX; });
+track.addEventListener('touchend', e => {
+    let endX = e.changedTouches[0].clientX;
+    if(endX - startX > 50) showSlide(index-1);
+    else if(startX - endX > 50) showSlide(index+1);
+});
+
+showSlide(0);
+
+// --- Lightbox ---
+const lightbox = document.getElementById('lightbox');
+const lbImage = document.getElementById('lb-image');
+const lbPrev = document.getElementById('lb-prev');
+const lbNext = document.getElementById('lb-next');
+
+// Open lightbox on main image click
+images.forEach((img, i) => {
+    img.addEventListener('click', () => {
+        lbImage.src = img.src;
+        lightbox.style.display = 'flex';
+        index = i;
+    });
+});
+
+// Arrow navigation inside lightbox
+lbPrev.addEventListener('click', () => {
+    index = (index - 1 + images.length) % images.length;
+    lbImage.src = images[index].src;
+});
+lbNext.addEventListener('click', () => {
+    index = (index + 1) % images.length;
+    lbImage.src = images[index].src;
+});
+
+// Close lightbox on click outside image
+lightbox.addEventListener('click', (e) => {
+    if(e.target === lightbox) lightbox.style.display = 'none';
+});
+</script>
+{% endblock %}

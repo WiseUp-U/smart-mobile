@@ -1,0 +1,23 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.sqlite3
+*.db
+env/
+venv/
+*.egg-info/
+*.egg
+
+# Flask / app
+instance/
+*.env
+
+# Static uploads
+/static/uploads/
+
+# VSCode / IDE
+.vscode/
+.idea/
+*.swp

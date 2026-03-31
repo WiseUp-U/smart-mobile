@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>{{ 'Edit Product' if product else 'Add Product' }}</h2>
+
+<form method="POST" enctype="multipart/form-data">
+    <!-- Product Details -->
+    <input name="name" placeholder="Name" value="{{ product.name if product else '' }}">
+    <input name="brand" placeholder="Brand" value="{{ product.brand if product else '' }}">
+    <input name="price" placeholder="Price" value="{{ product.price if product else '' }}">
+    <input name="ram" placeholder="RAM" value="{{ product.ram if product else '' }}">
+    <input name="storage" placeholder="Storage" value="{{ product.storage if product else '' }}">
+    <input name="condition" placeholder="Condition" value="{{ product.condition if product else '' }}">
+    <textarea name="description" placeholder="Description">{{ product.description if product else '' }}</textarea>
+
+    <!-- Existing Images -->
+    {% if product and product.images %}
+    <label>Existing Images (check to delete):</label>
+    <div>
+        {% for img in product.images %}
+        <div style="display:inline-block; margin:5px; text-align:center;">
+            <img src="/static/uploads/{{ img.filename }}" width="80"><br>
+            <input type="checkbox" name="delete_images" value="{{ img.id }}"> Delete
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- Upload New Images -->
+    <label>Upload New Images:</label>
+    <input type="file" name="images" multiple>
+
+    <!-- Submit Button -->
+    <button type="submit">{{ 'Save Changes' if product else 'Add Product' }}</button>
+</form>
+{% endblock %}

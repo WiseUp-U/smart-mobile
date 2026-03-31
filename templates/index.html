@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="product-listing" style="max-width:1200px; margin:auto; padding:20px;">
+
+    <!-- Search & Filter -->
+    <form method="GET" style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom:20px;">
+    <!-- Search -->
+    <input type="text" name="q" placeholder="Search products..." value="{{ request.args.get('q','') }}" style="flex:1; min-width:150px; padding:8px; border-radius:5px; border:1px solid #ccc;">
+
+    <!-- Brand Filter -->
+    <select name="brand" style="flex:1; min-width:150px; padding:8px; border-radius:5px; border:1px solid #ccc;">
+        <option value="">All Brands</option>
+        {% set brands = products|map(attribute='brand')|unique %}
+        {% for b in brands %}
+        <option value="{{ b }}" {% if request.args.get('brand')==b %}selected{% endif %}>{{ b }}</option>
+        {% endfor %}
+    </select>
+
+    <!-- Submit Button -->
+    <button type="submit" style="padding:8px 15px; background:#2E8B57; color:white; border:none; border-radius:5px;">Filter</button>
+</form>
+    </div>
+
+    <!-- Product Cards Grid -->
+    <div class="cards" style="display:grid; grid-template-columns:repeat(auto-fit, minmax(220px, 1fr)); gap:20px;">
+        {% for p in products %}
+        <div class="card" style="border:1px solid #ddd; border-radius:8px; overflow:hidden; transition:box-shadow 0.3s;">
+            {% if p.images|length > 0 %}
+            <img src="/static/uploads/{{ p.images[0].filename }}" loading="lazy">
+            {% endif %}
+            <div style="padding:10px;">
+                <h3 style="margin:5px 0; font-size:18px;">{{ p.name }}</h3>
+                <p style="margin:2px 0; color:#2E8B57; font-weight:bold;">${{ p.price }}</p>
+                <p style="margin:2px 0; font-size:14px; color:#555;">{{ p.brand }}</p>
+                <span style="display:inline-block; padding:2px 6px; border-radius:4px; background:{{ 'green' if p.status=='available' else 'red' }}; color:white; font-size:12px;">{{ p.status|capitalize }}</span>
+                <div style="margin-top:8px;">
+                    <a href="{{ url_for('product', id=p.id) }}" class="btn-view">View</a>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+</div>
+
+
+{% endblock %}
