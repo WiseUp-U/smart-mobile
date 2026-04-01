@@ -183,16 +183,17 @@ def toggle_status(id):
     return redirect(url_for('dashboard'))
 
 # ------------------ INIT ------------------
+with app.app_context():
+    db.create_all()
+
+    if not Admin.query.first():
+        admin = Admin(
+            username="admin",
+            password=generate_password_hash("admin123")
+        )
+        db.session.add(admin)
+        db.session.commit()
+
+# ------------------ RUN ------------------
 if __name__ == "__main__":
-    with app.app_context():
-        db.create_all()
-
-        if not Admin.query.first():
-            admin = Admin(
-                username="admin",
-                password=generate_password_hash("admin123")
-            )
-            db.session.add(admin)
-            db.session.commit()
-
     app.run(debug=True)
